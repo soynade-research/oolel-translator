@@ -1,0 +1,30 @@
+[project]
+name = "synthetic-data-gen"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "datasets>=4.4.2",
+    "ms-swift[llm]>=3.4.0",
+    "pytest>=9.0.2",
+    "ruff>=0.14.10",
+    "vllm>=0.6.1.post2",
+]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.format]
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint]
+extend-select = ["E501"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    # Ignore SWIG warnings from third-party libraries
+    "ignore:.*builtin type SwigPyPacked.*:DeprecationWarning",
+    "ignore:.*builtin type SwigPyObject.*:DeprecationWarning",
+]
