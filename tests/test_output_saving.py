@@ -18,7 +18,7 @@ def test_save_results_local(mock_vllm_engine, mock_dataset_class, base_args):
     mock_ds_instance = MagicMock()
     mock_dataset_class.from_list.return_value = mock_ds_instance
 
-    with patch("pathlib.Path.mkdir") as mock_mkdir:
+    with patch("pathlib.Path.mkdir"):
         generator.save_results(requests, responses)
 
         mock_dataset_class.from_list.assert_called_once()
