@@ -7,9 +7,13 @@ requires-python = ">=3.11"
 dependencies = [
     "datasets>=4.4.2",
     "ms-swift[llm]>=3.4.0",
-    "pytest>=9.0.2",
-    "ruff>=0.14.10",
     "vllm>=0.6.1.post2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=9.0.2",
+  "ruff>=0.14.10",
 ]
 
 [tool.ruff]

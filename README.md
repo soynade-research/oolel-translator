@@ -76,7 +76,7 @@ export HF_TOKEN="ACCESS_TOKEN"
 python src/inference.py \
     --model "soynade-research/Oolel-Small-v0.1" \
     --model_type "qwen2_5" \
-    --input "soyno/sample" \
+    --input "data/sample_input.jsonl" \
     --split "train" \
     --text_column "input" \
     --system_prompt "Translate to Wolof the following sentence"
@@ -88,7 +88,7 @@ python src/inference.py \
 HF_TOKEN=TOKEN python src/inference.py \
     --model "soynade-research/Oolel-Small-v0.1" \
     --model_type "qwen2_5" \
-    --input "soyno/sample" \
+    --input "hf_user_name/dataset_name" \
     --split "train" \
     --text_column "input" \
     --output "user_name/output_dataset" \
@@ -101,10 +101,10 @@ HF_TOKEN=TOKEN python src/inference.py \
 
 ```bash
 python inference_pipeline.py \
-    --model "fantan/v5-20250731-031150" \
-    --input "data/english_texts.jsonl" \
+    --model "soynade-research/Oolel-Small-v0.1" \
+    --input "data/sample_input.jsonl" \
     --text-column "text" \
-    --output "outputs/bambara_translations.jsonl" \
+    --output "output/wolof_translations.jsonl" \
     --system-prompt "Translate to Wolof:" \
     --temperature 0.1
 ```
@@ -141,7 +141,7 @@ HF_TOKEN=TOKEN python src/inference.py \
 HF_TOKEN=TOKEN python src/inference.py \
     --model "soynade-research/Oolel-Small-v0.1" \
     --model_type "qwen2_5" \
-    --input "soyno/sample" \
+    --input "hf_user_name/dataset_name" \
     --split "train" \
     --text_column "input" \
     --output "user_name/output_dataset" \
@@ -158,7 +158,7 @@ python src/inference.py \
     --text_column "input" \
     --batch_size 4 \
     --input "data/input.jsonl" \
-    --output "output.jsonl"
+    --output "output/synthetic.jsonl"
 ```
 
 ## Command Line Options
@@ -174,7 +174,7 @@ python src/inference.py \
 ### Optional Arguments
 
 | Argument | Default | Description |
-|----------|---------|-------------|
+|--------------|-------------|-----------------|
 | `--model_type` | qwen2_5 | MS-Swift model type (e.g., qwen2_5, llama3) |
 | `--backend` | vllm | Inference backend: `vllm` or `pt`|
 | `--output` | generated_output.jsonl | Output: local path or HF repo ID |

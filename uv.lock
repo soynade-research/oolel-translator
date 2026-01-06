@@ -3800,19 +3800,24 @@ source = { virtual = "." }
 dependencies = [
     { name = "datasets" },
     { name = "ms-swift" },
+    { name = "vllm" },
+]
+
+[package.optional-dependencies]
+dev = [
     { name = "pytest" },
     { name = "ruff" },
-    { name = "vllm" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "datasets", specifier = ">=4.4.2" },
     { name = "ms-swift", extras = ["llm"], specifier = ">=3.4.0" },
-    { name = "pytest", specifier = ">=9.0.2" },
-    { name = "ruff", specifier = ">=0.14.10" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.2" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.14.10" },
     { name = "vllm", specifier = ">=0.6.1.post2" },
 ]
+provides-extras = ["dev"]
 
 [[package]]
 name = "tensorboard"
