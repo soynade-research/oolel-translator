@@ -24,7 +24,7 @@ Soynade Research is committed to providing a welcoming, inclusive, and harassmen
 
 ### Reporting
 If you experience or witness unacceptable behavior, report it to:
-- **Email:** soynaderesearch@gmail.com
+- **Email:** contact@soynade.ai
 - **Subject line:** "Code of Conduct Report"
 
 All reports will be kept confidential.
