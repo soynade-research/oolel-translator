@@ -1,29 +1,27 @@
-# Synthetic Data Generation
+# Oolel Translator
 
-Batch inference pipeline for generating synthetic translation data using MS-Swift with vLLM backend.
+A batch inference pipeline designed for generating synthetic translation datasets. It utilizes MS-Swift with a vLLM backend to perform high-throughput translation tasks, supporting both local storage and direct HuggingFace Hub integration.
 
 ## Features
 
-- Fast batch inference with vLLM (primary) and PyTorch (fallback)
-- Automatic dataset loading from HuggingFace Hub or local files
-- Support for multiple input formats (JSONL, JSON, CSV)
-- Configurable system prompts and generation parameters
-- Performance metrics and throughput tracking
-- Save locally or push directly to HuggingFace Hub
+* **Batch Inference:** Optimized for speed using vLLM (primary) with a PyTorch fallback.
+* **Flexible Input/Output:** Supports JSONL, JSON, and CSV formats.
+* **Hub Integration:** Automatically loads datasets from and pushes results to the HuggingFace Hub.
+* **Customizable Generation:** Configurable system prompts, temperature, and context windows.
+* **Resource Management:** Options for tensor parallelism and GPU memory utilization.
 
 ## Installation
 
 First, clone the repository and navigate into the directory:
 
 ```bash
-git clone https://github.com/soynade-research/synthetic-data-generation.git
-cd synthetic-data-generation
+git clone https://github.com/soynade-research/oolel-translator.git
+cd oolel-translator
 ```
 
 
-### 1. Option 1 (Recommanded)
-
-You can automate the installation of `uv`, the virtual environment creation, and dependency installation using the provided script.
+### 1. Option 1: Automated Setup (Recommended)
+Run the setup script to install `uv`, create the virtual environment, and install dependencies.
 
 ```bash
 source setup.sh
@@ -31,12 +29,12 @@ source setup.sh
 
 Using source to run the script ensures the virtual environment is automatically activated in your current terminal.
 
-**Note:** If you run `bash setup.sh` instead, the installation will succeed, but you will need to manually run `source .venv/bin/activate` afterwards.
+If you run `bash setup.sh` instead, the installation will succeed, but you will need to manually run `source .venv/bin/activate` afterwards.
 
 
 ### 2. Manual Installation
 
-If you prefer to install the dependencies step-by-step, follow the instructions below.
+If you prefer to configure the environment manually:
 1. **Install UV**: 
 
 If you don't have uv installed, get it via curl:
@@ -62,15 +60,18 @@ uv pip install 'ms-swift[llm]'
 ```
 
 ### 3. Configure HuggingFace Token
-If you wish to push the generated data in the Hub, you can configure your access token by running below command on your terminal (you can also pass directly the access token in `run.sh`)
-
+To push generated data to the Hub or access gated models, set your access token:
 ```bash
 export HF_TOKEN="ACCESS_TOKEN"
 ```
+You can also pass directly the access token in `run.sh`
+
+
 
 ## Quick Start
 
-### Basic Usage (Save Locally)
+### Basic Usage (Local Save)
+This command reads a local file and saves the translation locally.
 
 ```bash
 python src/inference.py \
@@ -82,7 +83,8 @@ python src/inference.py \
     --system_prompt "Translate to Wolof the following sentence"
 ```
 
-### Push to HuggingFace Hub
+### Hub-to-Hub Usage
+This command reads a dataset from HuggingFace and pushes the results back to the Hub.
 
 ```bash
 HF_TOKEN=TOKEN python src/inference.py \
@@ -100,7 +102,7 @@ HF_TOKEN=TOKEN python src/inference.py \
 ### 1. Local File → Local File
 
 ```bash
-python inference_pipeline.py \
+python inference.py \
     --model "soynade-research/Oolel-Small-v0.1" \
     --input "data/sample_input.jsonl" \
     --text-column "text" \
@@ -115,9 +117,9 @@ python inference_pipeline.py \
 python src/inference.py \
     --model "soynade-research/Oolel-Small-v0.1" \
     --model_type "qwen2_5" \
-    --input "data/input.jsonl" \
+    --input "databricks/databricks-dolly-15k" \
     --split "train" \
-    --text_column "input" \
+    --text_column "instruction" \
     --output "wolof_translations.jsonl" \
     --system_prompt "Translate to Wolof the following sentence"
 ```
@@ -135,31 +137,39 @@ HF_TOKEN=TOKEN python src/inference.py \
     --system_prompt "Translate to Wolof the following sentence"
 ```
 
-### 4. HuggingFace Dataset → HuggingFace Hub
 
-```bash
-HF_TOKEN=TOKEN python src/inference.py \
-    --model "soynade-research/Oolel-Small-v0.1" \
-    --model_type "qwen2_5" \
-    --input "hf_user_name/dataset_name" \
-    --split "train" \
-    --text_column "input" \
-    --output "user_name/output_dataset" \
-    --system_prompt "Translate to Wolof the following sentence"
-```
-
-### 5. Using PyTorch Backend
+### 4. Using PyTorch Backend
 
 ```bash
 python src/inference.py \
     --model "soynade-research/Oolel-Small-v0.1"\
     --backend pt \
-    --model_type qwen2_5 \
+    --model_type "qwen2_5" \
     --text_column "input" \
     --batch_size 4 \
     --input "data/input.jsonl" \
     --output "output/synthetic.jsonl"
 ```
+
+## Advanced Usage
+
+### Multi-GPU Inference (Tensor Parallelism)
+
+To distribute the model across multiple GPUs, use the `--tensor_parallel_size` argument. This is required for vLLM to shard the model correctly.
+
+```bash
+python src/inference.py \
+    --model "soynade-research/Oolel-Small-v0.1" \
+    --backend vllm \
+    --tensor_parallel_size 4 \
+    --input "hf_user_name/dataset_name" \
+    --split "train" \
+    --output "output.jsonl"
+```
+
+### Memory Optimization
+
+If you encounter Out of Memory (OOM) errors, adjust the GPU utilization or context window.
 
 ## Command Line Options
 
@@ -194,14 +204,14 @@ python src/inference.py \
 
 ## Input Format
 
-### JSONL (Recommended)
+The pipeline accepts JSONL, JSON, or CSV. **JSONL (Recommended)**:
 
 ```jsonl
 {"text": "Hello, how are you?", "id": 1}
 {"text": "The weather is nice today.", "id": 2}
 ```
 
-### JSON
+- JSON
 
 ```json
 [
@@ -210,7 +220,7 @@ python src/inference.py \
 ]
 ```
 
-### CSV
+- CSV
 
 ```csv
 id,text
@@ -220,11 +230,10 @@ id,text
 
 ## Output Format
 
-Results are saved in JSONL format with three fields:
+Results are saved in JSONL format containing the prompt, original input, and model output.
 
 ```jsonl
-{"system_prompt": "Translate to Wolof:", "input": "english or french input", "output": "model translation"}
-{"system_prompt": "Translate to Wolof:", "input": "english or french input", "output": "model translation"}
+{"system_prompt": "Translate to Wolof:", "input": "input", "output": "output"}
 ```
 
 ## How Output Works
@@ -299,49 +308,22 @@ Or pass directly:
 ## Project Structure
 
 ```
-synthetic-data-generation/
-├── inference_pipeline.py    # Main script
-├── README.md               # This file
+oolel-translator/
+├── src/
+│   └── inference.py    # Main script
+├── README.md               
+├── LICENSE.md               
+├── CODE_OF_CONDUCT.md               
+├── CONTRIBUTING.md              
 ├── pyproject.toml         # UV dependencies
 ├── setup.sh               # Setup script
-├── .env.example           # Environment template
 ├── .gitignore
 ├── data/
 │   └── sample_input.jsonl
-└── outputs/
-    └── .gitkeep
+└── output/
+    └── synthetic_wolof.jsonl # Example of output file
 ```
 
-## Environment Variables
-
-Create a `.env` file:
-
-```bash
-HF_TOKEN=your_huggingface_token
-CUDA_VISIBLE_DEVICES=0
-```
-
-## Advanced Usage
-
-### Custom Model Types
-
-```bash
-python inference_pipeline.py \
-    --model "path/to/model" \
-    --model-type "qwen2_5" \
-    --input "data/input.jsonl" \
-    --output "output.jsonl"
-```
-
-### Multi-GPU (vLLM with tensor parallelism)
-
-```bash
-CUDA_VISIBLE_DEVICES=0,1,2,3 python inference_pipeline.py \
-    --model "large-model" \
-    --backend vllm \
-    --input "data/input.jsonl" \
-    --output "output.jsonl"
-```
 
 ## Contributing
 
@@ -351,6 +333,8 @@ Contributions welcome! Please:
 3. Make your changes
 4. Submit a pull request
 
+Check [CONTRIBUTING.md](CONTRIBUTING.md) for more information. 
+
 ## License
 
 MIT License - see LICENSE file for details
@@ -358,10 +342,10 @@ MIT License - see LICENSE file for details
 ## Citation
 
 ```bibtex
-@software{synthetic_data_generation,
-  title={Synthetic Data Generation},
+@misc{oolel_translator,
+  title={Oolel Translation Data Generation Pipeline},
   author={Soynade Research},
-  year={2025},
-  url={https://github.com/soynade-research/synthetic-data-generation}
+  year={2026},
+  url={https://github.com/soynade-research/oolel-translator}
 }
 ```
