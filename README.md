@@ -117,7 +117,7 @@ python inference.py \
 python src/inference.py \
     --model "soynade-research/Oolel-Small-v0.1" \
     --model_type "qwen2_5" \
-    --input "databricks/databricks-dolly-15k" \
+    --input "user_name/repo" \
     --split "train" \
     --text_column "instruction" \
     --output "wolof_translations.jsonl" \
