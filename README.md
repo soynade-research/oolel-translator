@@ -97,6 +97,9 @@ HF_TOKEN=TOKEN python src/inference.py \
     --system_prompt "Translate to Wolof the following sentence"
 ```
 
+-----
+**Note**: For model type parameter, you can refer to [MS-SWIFT ](https://swift.readthedocs.io/en/latest/Instruction/Supported-models-and-datasets.html) documentation for all supported models.
+
 ## Usage Examples
 
 ### 1. Local File → Local File
