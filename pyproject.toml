@@ -27,6 +27,7 @@ docstring-code-format = true
 extend-select = ["E501"]
 
 [tool.pytest.ini_options]
+testpaths = ["tests"]
 filterwarnings = [
     # Ignore SWIG warnings from third-party libraries
     "ignore:.*builtin type SwigPyPacked.*:DeprecationWarning",

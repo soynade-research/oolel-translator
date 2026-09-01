@@ -1,6 +1,8 @@
 import sys
 from unittest.mock import patch
 
+import pytest
+
 from src.inference import parse_arguments
 
 
@@ -31,8 +33,28 @@ def test_parse_arguments_custom():
             "pt",
             "--temperature",
             "0.7",
+            "--text_column",
+            "source",
+            "--max_tokens",
+            "512",
         ],
     ):
         args = parse_arguments()
         assert args.backend == "pt"
         assert args.temperature == 0.7
+        assert args.text_column == "source"
+        assert args.max_tokens == 512
+
+
+def test_parse_arguments_rejects_invalid_backend():
+    argv = [
+        "prog",
+        "--model",
+        "oolel",
+        "--input",
+        "data.json",
+        "--backend",
+        "invalid",
+    ]
+    with patch.object(sys, "argv", argv), pytest.raises(SystemExit):
+        parse_arguments()
