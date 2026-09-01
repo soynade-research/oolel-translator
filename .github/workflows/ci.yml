@@ -1,4 +1,4 @@
-name: CI
+name: Unit tests
 
 on:
   pull_request:
@@ -6,8 +6,10 @@ on:
   push: {}
 
 jobs:
-  test-and-lint:
+  unit-tests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -18,17 +20,25 @@ jobs:
           enable-cache: true
           python-version: "3.11"
 
-      - name: Create virtuel environment
-        run: uv venv
+      - name: Create virtual environment
+        run: uv venv --python 3.11
 
-      - name: Install project dependancies
-        run: uv pip install -e ".[dev]"
+      # Tests stub the runtime ML collaborators, so CI installs no vLLM/CUDA
+      # packages and downloads no models or datasets.
+      - name: Install test tools
+        run: >-
+          uv pip install --python .venv/bin/python
+          "pytest>=9.0.2" "pytest-cov>=7.0.0" "ruff>=0.14.10"
 
-      - name: Run Lint check
-        run: uv run ruff check .
+      - name: Check lint
+        run: .venv/bin/ruff check src tests
 
-      - name: Run Format check
-        run: uv run ruff format --check .
+      - name: Check formatting
+        run: .venv/bin/ruff format --check src tests
 
-      - name: Run Unit Tests
-        run: uv run pytest
+      - name: Run unit tests with coverage
+        run: >-
+          .venv/bin/python -m pytest
+          --cov=src.inference
+          --cov-report=term-missing
+          --cov-report=xml:coverage.xml

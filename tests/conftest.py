@@ -1,7 +1,36 @@
 import argparse
+import sys
+from types import ModuleType
 from unittest.mock import MagicMock
 
 import pytest
+
+
+class InferRequestStub:
+    def __init__(self, messages):
+        self.messages = messages
+
+
+def _stub_module(name, **attributes):
+    module = ModuleType(name)
+    module.__dict__.update(attributes)
+    sys.modules[name] = module
+    return module
+
+
+# Unit tests replace all runtime collaborators; importing them must not require
+# vLLM, CUDA, datasets, network access, or model downloads.
+_stub_module("datasets", load_dataset=MagicMock(), Dataset=MagicMock())
+llm = _stub_module(
+    "swift.llm",
+    InferEngine=object,
+    InferRequest=InferRequestStub,
+    PtEngine=MagicMock(),
+    VllmEngine=MagicMock(),
+    RequestConfig=MagicMock(),
+)
+plugin = _stub_module("swift.plugin", InferStats=MagicMock())
+_stub_module("swift", llm=llm, plugin=plugin)
 
 
 @pytest.fixture
