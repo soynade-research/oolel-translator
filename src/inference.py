@@ -1,17 +1,16 @@
-import os
-import json
 import argparse
+import json
 import logging
+import os
 from pathlib import Path
-from typing import List
 
-from datasets import load_dataset, Dataset
+from datasets import Dataset, load_dataset
 from swift.llm import (
     InferEngine,
     InferRequest,
     PtEngine,
-    VllmEngine,
     RequestConfig,
+    VllmEngine,
 )
 from swift.plugin import InferStats
 
@@ -177,7 +176,7 @@ class SyntheticDataGenerator:
         if self.args.backend == "vllm":
             try:
                 vllm_extra = json.loads(self.args.vllm_extra or "{}")
-            except Exception as e:
+            except json.JSONDecodeError as e:
                 raise ValueError(f"Invalid JSON for --vllm-extra: {e}")
 
             vllm_kwargs = {
@@ -198,7 +197,7 @@ class SyntheticDataGenerator:
                 max_batch_size=self.args.batch_size,
             )
 
-    def load_input_data(self) -> List[InferRequest]:
+    def load_input_data(self) -> list[InferRequest]:
         """
         Load input dataset and prepare inference requests.
         """
@@ -218,7 +217,7 @@ class SyntheticDataGenerator:
                 ]
             )
             for row in dataset
-            if self.args.text_column in row and row[self.args.text_column]
+            if row.get(self.args.text_column)
         ]
 
         if not requests:
@@ -243,7 +242,7 @@ class SyntheticDataGenerator:
             # Assume HuggingFace Hub dataset ID
             return load_dataset(input_path, split=self.args.split)
 
-    def generate(self, requests: List[InferRequest]) -> List:
+    def generate(self, requests: list[InferRequest]) -> list:
         """
         Run batch inference on requests.
 
@@ -271,7 +270,7 @@ class SyntheticDataGenerator:
         logger.info(f"Generation complete. Throughput: {stats.compute()}")
         return responses
 
-    def save_results(self, requests: List[InferRequest], responses: List):
+    def save_results(self, requests: list[InferRequest], responses: list):
         """
         Save results locally or push to HuggingFace Hub.
 
@@ -341,8 +340,8 @@ class SyntheticDataGenerator:
 
             logger.info("Pipeline completed successfully!")
 
-        except Exception as e:
-            logger.error(f"✗ Pipeline failed: {e}", exc_info=True)
+        except Exception:
+            logger.exception("✗ Pipeline failed")
             raise
 
 

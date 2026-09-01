@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.inference import SyntheticDataGenerator, InferRequest
+from src.inference import InferRequest, SyntheticDataGenerator
 
 
 def _response(content):
